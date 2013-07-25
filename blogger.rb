@@ -1,22 +1,55 @@
-require 'rubygems'
-require 'active_record'
-require 'logger'
-require 'yaml'
-
-require './model/blog.rb'
-require './model/user.rb'
-require './model/post.rb'
-require './model/comment.rb'
-
-ActiveRecord::Base.logger = Logger.new(STDOUT)
-@config = YAML::load_file('./database.yml')
-ActiveRecord::Base.establish_connection(@config)
+require './require_libs.rb'
 
 class Blogger
-  def test
-    blog=Blog.new
-    puts "created blog"+blog.to_s
+  def self.test   
+    users=User.includes(:posts).last(3)
+    #     SOLUTION FOR EAGER LOADING
+    users.each{|u|
+               puts u.name
+              u.posts.each{|p|
+                           puts "\t* POST BY "+u.name+" : "+p.content
+                          }  
+              }
+  end
+  
+  def self.method_missing method, *args, &block
+    super unless method =~ /[a-z]+_[0-9]+_[a-z]+/
+    position,count,table= method.to_s.split "_"
+    puts "getting "+position+" - "+count+" records of "+table
+    #     users=User.includes(:posts).last(3)
+    case position
+    when /first/
+      case table
+      when /users/
+	users=User.includes(:posts).first(3)
+      when /blogs/
+	users=User.includes(:posts).first(3)
+      when /posts/
+	users=User.includes(:posts).first(3)
+      when /comments/
+	users=User.includes(:posts).first(3)
+      else
+      end
+    when /last/
+      case table
+      when /users/
+	users=User.includes(:posts).last(3)
+      when /blogs/
+	users=User.includes(:posts).last(3)
+      when /posts/
+	users=User.includes(:posts).last(3)
+      when /comments/
+	users=User.includes(:posts).last(3)
+      else
+      end
+    else
+    end
   end
 end
 
-Blogger.new.test
+# Blogger.test  
+Blogger.last_3_users
+Blogger.last_3_blogs
+#     users=User.find :all, order:"updated_at DESC",include:{posts:{}}, limit:10
+#     users=User.includes(:posts)
+#     users=User.joins(:posts).last(3)
