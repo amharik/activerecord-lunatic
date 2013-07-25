@@ -1,0 +1,4 @@
+adapter : 'mysql'
+database: 'blog_database'
+username: 'root'
+password: 'forgotpassword'
