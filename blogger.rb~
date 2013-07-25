@@ -2,11 +2,12 @@ require './require_libs.rb'
 
 class Blogger
   def self.method_missing method, *args, &block
-    super unless method =~ /[a-z]+_[0-9]+_[a-z]+/
+    super unless method =~ /[a-z]+_[n0-9]+_[a-z]+/
     position,count,table= method.to_s.split "_"
-    return eval "#{table.capitalize.singularize}.#{position}(#{count});"
+    return (count=="n")? eval "#{table.capitalize.singularize}.all;" : eval "#{table.capitalize.singularize}.#{position}(#{count});"
   end
 end
+
 #posts in a blog
 #comment user
 #group month
@@ -14,12 +15,10 @@ end
 
 # Blogger.test  
 Blogger.last_2_users.each{|u| puts u.name}
-
 Blogger.last_2_blogs.each{|b| puts b.title}
+Blogger.last_n_posts.each{|p| puts p.content}
 
 Blogger.first_1_comments.each{|c| puts c.content}
-
-
 #comments GARAGE
 #     puts "getting "+position+" - "+count+" records of "+table
 #     users=User.includes(:posts).last(3)
