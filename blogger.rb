@@ -1,7 +1,16 @@
 require './require_libs.rb'
 
 class Blogger
-  def self.method_missing method, *args, &block
+  include BloggerAPI
+end
+
+module BloggerAPI
+  def self.included(base)
+    base.extend ClassMethods
+  end
+  
+  module ClassMethods
+    def self.method_missing method, *args, &block
     super unless method =~ /[a-z]+_[a-z0-9_]+/
     case method
     when /total_[a-z0-9]+/
@@ -28,5 +37,6 @@ class Blogger
     else
       puts "NOT RECOGNIZD!"
     end
+  end
   end
 end
