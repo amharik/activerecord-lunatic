@@ -2,7 +2,6 @@ require './blogger_api.rb'
 
 class Blogger
   include BloggerAPI
-  
   connect "database.yml"
   
   def self.play
