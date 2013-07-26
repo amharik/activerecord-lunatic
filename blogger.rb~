@@ -1,47 +1,30 @@
-require './require_libs.rb'
-module BloggerAPI
-  def self.included(base)
-    base.extend ClassMethods
-  end
-  
-  module ClassMethods
-    def connect YAML_File
-      ActiveRecord::Base.logger = Logger.new(STDOUT)
-      @config = YAML::load_file YAML_File
-      ActiveRecord::Base.establish_connection(@config)
-    end
-    def method_missing method, *args, &block
-      super unless method =~ /[a-z]+_[a-z0-9_]+/
-	  case method
-    when /total_[a-z0-9]+/
-      emptyString,table = method.to_s.split "total_"
-      return eval "#{table.capitalize.singularize}.count;"
-      
-    when /group_blogs/
-      return Blog.group("DATE_FORMAT(created_at, '%m-%y')").count('*')
-      
-    when /[a-z]+_[n0-9]+_[a-z]+/
-      position,count,table= method.to_s.split "_"
-      return (count=="n")? (eval "#{table.capitalize.singularize}.all;") :(eval "#{table.capitalize.singularize}.#{position}(#{count});")
-      
-    when /[a-z]+_by_date/
-      table,empty= method.to_s.split "_by_date"
-      hash=args[0]
-      return eval "#{table.capitalize.singularize}.where(\"DATE_FORMAT(created_at,'%m-%y')='#{hash[:month]}-#{hash[:year]}'\")";
-      
-    when /[a-z]+_(in|by)_[a-z]+/
-      child,relation,parent= method.to_s.split "_"
-      puts "finding "+child+" in "+parent
-      return (eval "#{parent.capitalize}.includes(:#{child}).all");
-      
-    else
-      puts "WILL BE ADDED IN FUTURE!"
-    end
-  end
-end
-end
+require './blogger_api.rb'
 
 class Blogger
   include BloggerAPI
-  connect 'database.yml'
+  
+  connect "database.yml"
+  
+  def self.play
+    
+    last_2_users.each{|u| puts u.name}
+    last_2_blogs.each{|b| puts b.title}
+    last_n_posts.each{|p| puts p.content}
+    first_1_comments.each{|c| puts c.content}
+    
+    posts_in_blog.each{|b| b.posts.each{|p| puts p.content}}
+    comments_by_user.each{|u| u.comments.each{|c| puts c.content}}
+    
+    puts "The number of blogs created at 07-13 is "
+    puts Blogger.group_blogs["07-13"]
+    
+    puts "The Blogs are:"
+    (blogs_by_date year:'13',month:'07').each_with_index{|b,i|puts "#{i+1}. #{b.title}"}
+    
+    puts "total number of blogs is #{total_blogs}"
+    puts "total number of users is #{total_users}"
+    
+  end
 end
+
+Blogger.play

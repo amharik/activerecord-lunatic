@@ -18,6 +18,11 @@ task :fun=> :environment do
   load('model/blog.rb')
   load('model/post.rb')
   load('model/comment.rb')
+  make_users
+  make_blogs
+  make_posts
+  make_comments
+=begin
   
   buck = User.create name: 'Buck'
   alice = User.create name: 'Alice'
@@ -43,12 +48,14 @@ task :fun=> :environment do
   blogByAlice.posts.push postByAlice
   alice.blogs.push blogByAlice
   
+  
   puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
   buck.posts.each{|p| puts p.content}
-#   puts postByBuck
+  #   puts postByBuck
   puts postByBuck.user.name
   puts postByBuck.blog.title
   puts "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+=end
 end
 
 
@@ -75,5 +82,72 @@ namespace :db do
     usr.name='Alice'
     usr.save
     
+  end
+end
+
+
+
+
+def make_users
+  puts "MAKE USERS"
+  50.times do |n|
+    name = "#{n+1}-CREATURE"
+    email = "#{n+1}-creature@iceage.in"
+    User.create! name:name, email:email
+  end
+end
+
+
+
+def make_blogs
+  puts "MAKE BLOGS"
+  users = User.all
+  r = Random.new
+  users.each do |user| 
+    num_blogs=r.rand(0..3)
+    num_blogs.times do |n|
+      title="#{user.name.pluralize} BLOG-#{n+1}"
+      content="BLOG BY #{user.name} IN BLOG #{n+1}"
+      user.blogs.create! title:title, content:content      
+    end
+  end
+end
+
+
+
+def make_posts
+  puts "MAKE POSTS"
+  blogs = Blog.all
+  r = Random.new
+  blogs.each do |blog| 
+    num_posts=r.rand(0..5)
+    num_posts.times do |n|
+      user= blog.user
+      
+      content="POST BY #{user.name} IN POST #{n+1}"
+      post = Post.create! content:content
+      
+      user.posts.push post
+      blog.posts.push post      
+    end
+  end
+end
+
+def make_comments
+  puts "MAKE COMMENTS"
+  posts = Post.all
+  r = Random.new
+  posts.each do |post| 
+    num_comments=r.rand(0..5)
+    num_comments.times do |n|
+      #       random user commented.
+      random_user = User.find r.rand(1..40)
+      content="COMMENT BY #{random_user.name} IN COMMENT #{n+1}"
+      comment = Comment.create! content:content
+      
+      random_user.comments.push comment
+      post.comments.push comment
+      
+    end
   end
 end
