@@ -5,9 +5,14 @@ module BloggerAPI
   end
   
   module ClassMethods
+    def connect YAML_File
+      ActiveRecord::Base.logger = Logger.new(STDOUT)
+      @config = YAML::load_file YAML_File
+      ActiveRecord::Base.establish_connection(@config)
+    end
     def method_missing method, *args, &block
-    super unless method =~ /[a-z]+_[a-z0-9_]+/
-    case method
+      super unless method =~ /[a-z]+_[a-z0-9_]+/
+	  case method
     when /total_[a-z0-9]+/
       emptyString,table = method.to_s.split "total_"
       return eval "#{table.capitalize.singularize}.count;"
@@ -30,12 +35,13 @@ module BloggerAPI
       return (eval "#{parent.capitalize}.includes(:#{child}).all");
       
     else
-      puts "NOT RECOGNIZD!"
+      puts "WILL BE ADDED IN FUTURE!"
     end
   end
-  end
+end
 end
 
 class Blogger
   include BloggerAPI
+  connect 'database.yml'
 end
